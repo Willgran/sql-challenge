@@ -1,1 +1,158 @@
+CREATE TABLE "Departments" (
+    "dept_no" varchar   NOT NULL PRIMARY KEY,
+    "dept_name" varchar   NOT NULL
+ );
+
+
+CREATE TABLE "Dept_Emp" (
+   
+    "emp_no" integer   NOT NULL,
+	"dept_no" varchar   NOT NULL,
+    "from_date" date   NOT NULL,
+    "to_date" date   NOT NULL
+);
+
+CREATE TABLE "Dept_Manager" (
+    "dept_no" varchar   NOT NULL,
+    "emp_no" integer   NOT NULL,
+    "from_date" date   NOT NULL,
+    "to_date" date   NOT NULL
+);
+
+CREATE TABLE "Employees" (
+    "emp_no" integer   NOT NULL PRIMARY KEY,
+    "birth_date" date   NOT NULL,
+    "first_name" varchar   NOT NULL,
+    "last_name" varchar   NOT NULL,
+    "gender" varchar   NOT NULL,
+    "hire_date" date   NOT NULL
+    CONSTRAINT "pk_Employees" PRIMARY KEY (
+        "emp_no"
+     )
+);
+
+CREATE TABLE "Salaries" (
+    "emp_no" integer   NOT NULL,
+    "salary" float NOT NULL,
+    "from_date" date   NOT NULL,
+    "to_date" date   NOT NULL
+);
+
+CREATE TABLE "Titles" (
+    "emp_no" integer   NOT NULL,
+    "titles" varchar   NOT NULL,
+    "from_date" date   NOT NULL,
+    "to_date" date     NOT NULL
+);
+
+
+
+ALTER TABLE "Dept_Emp" ADD CONSTRAINT "fk_Dept_Emp_dept_no" FOREIGN KEY("dept_no")
+REFERENCES "Departments" ("dept_no");
+
+ALTER TABLE "Dept_Manager" ADD CONSTRAINT "fk_Dept_Manager_dept_no" FOREIGN KEY("dept_no")
+REFERENCES "Departments" ("dept_no");
+
+ALTER TABLE "Salaries" ADD CONSTRAINT "fk_Salaries_emp_no" FOREIGN KEY("emp_no")
+REFERENCES "Employees" ("emp_no");
+
+ALTER TABLE "Titles" ADD CONSTRAINT "fk_Titles_emp_no" FOREIGN KEY("emp_no")
+REFERENCES "Employees" ("emp_no");
+
+
+
+
+select * from "Dept_Emp";
+select * from "Departments" ;
+select * from "Dept_Manager" ;
+select * from "Employees" ;
+select * from "Salaries" ;
+select * from "Titles" ;
+
+
+
+
+
+-- 1.List the following details of each employee: employee number, last name, first name, gender, and salary.
+
+SELECT E.emp_no , E.last_name , E.first_name, E.gender , S.salary
+FROM "Employees" E
+JOIN "Salaries" S
+ON (E.emp_no = S.emp_no);
+
+
+-- 2.List employees who were hired in 1986.
+
+SELECT first_name , last_name , hire_date
+FROM "Employees"
+WHERE hire_date BETWEEN '1986-01-01' AND '1986-12-31';
+
+
+
+-- 3.List the manager of each department with the following information: department number, department name, the manager's employee number, 
+     --last name, first name, and start and end employment dates.
+
+SELECT D.dept_no, D.dept_name  , M.emp_no  , E.first_name , E.last_name , M.from_date ,  M.to_date
+FROM "Departments" AS D
+JOIN "Dept_Manager" AS M ON M.dept_no = D.dept_no
+JOIN "Employees" AS E ON M.emp_no = E.emp_no;
+    
+
+-- 4.List the department of each employee with the following information: employee number, last name, first name, and department name.
+
+SELECT  M.emp_no , E.first_name , E.last_name ,D.dept_name
+FROM "Departments" AS D
+JOIN "Dept_Manager" AS M ON M.dept_no = D.dept_no
+JOIN "Employees" AS E ON M.emp_no = E.emp_no;
+    
+
+-- 5.List all employees whose first name is "Hercules" and last names begin with "B."
+
+SELECT emp_no , first_name , last_name
+FROM "Employees"
+WHERE first_name = 'Hercules' AND last_name LIKE ('B%');
+
+
+-- 6.List all employees in the Sales department, including their employee number, last name, first name, and department name.
+
+
+SELECT first_name, last_name , emp_no 
+FROM "Employees"
+WHERE emp_no IN
+(
+  SELECT emp_no
+  FROM "Dept_Manager"
+  WHERE dept_no IN
+  (
+    SELECT dept_no 
+    FROM "Departments"
+    WHERE dept_name LIKE 'Sales'
+  )
+);
+
+
+-- 7.List all employees in the Sales and Development departments, including their employee number, last name, first name, and department name.
+
+SELECT first_name, last_name , emp_no 
+FROM "Employees"
+WHERE emp_no IN
+(
+  SELECT emp_no
+  FROM "Dept_Manager"
+  WHERE dept_no IN
+  (
+    SELECT dept_no 
+    FROM "Departments"
+    WHERE dept_name LIKE 'Sales' OR dept_name LIKE 'Development'
+  )
+);
+
+
+-- 8.In descending order, list the frequency count of employee last names, i.e., how many employees share each last name.
+
+SELECT last_name AS "Shared Last Names" , count (last_name) AS "No of shared last_names"
+FROM "Employees"
+GROUP BY last_name 
+ORDER BY "No of shared last_names" DESC ;
+
 
